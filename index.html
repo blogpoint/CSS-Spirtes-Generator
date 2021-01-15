@@ -1,37 +1,1776 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html dir="ltr" mozdisallowselectionprint moznomarginboxes>
 <head>
-  <!-- Global site tag (gtag.js) - Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-44713249-3"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">			
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>PDF Viewer Online</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="google" content="notranslate">
+<meta name="description" content="PDF Online Viewer, Reader is a free online tool that allows you to view PDF, DOC, XLS, PPT files directly in your web browser. PDF Viewer Online reads files without uploading the file to any servers. It does not save or share the file you select. It only works locally without going through the server. Powered by HTML5 technology & Mozilla PDF Web Reader">
+<meta name="keywords" content="pdf viewer, pdf reader, pdf viewer online, pdf reader online, doc viewer, xls viewer, ppt viewer, office viewer, doc to pdf, xls to pdf, ppt to pdf, docx to pdf, xlsx to pdf, pptx to pdf">
 
-    gtag('config', 'UA-44713249-3');
-  </script>
-  <meta charset="utf-8">
-  <title>CutePDF Editor</title>
-  <base href="https://editor.cutepdf.com/">
+<meta property="og:title" content="PDF Viewer Online"> 
+<meta property="og:description" content="PDF Online Viewer, Reader is a free online tool that allows you to view PDF, DOC, XLS, PPT files directly in your web browser. PDF Viewer Online reads files without uploading the file to any servers. It does not save or share the file you select. It only works locally without going through the server. Powered by HTML5 technology & Mozilla PDF Web Reader">
+<meta property="og:type" content="website">
+<meta property="og:url" content="http://pdfviewer.softgateon.net/">
+<meta property="og:image" content="http://pdfviewer.softgateon.net/img/logo128.png">
+<link rel="shortcut icon" href="./favicon.ico">
 
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="cutepdfeditor.ico">
-  <!--<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">-->
-  <!--<link href="https://fonts.googleapis.com/css?family=Montserrat:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i&display=swap" rel="stylesheet">-->
-  <!--<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700,700i&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,400i&display=swap" rel="stylesheet">-->
-  <!--<link href="https://fonts.googleapis.com/css?family=Montserrat:400,400i|Open+Sans:400,700&display=swap" rel="stylesheet">-->
-  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,400i,700,700i|Open+Sans:400,700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.4093ac4b2852ca8c989c.css"></head>
-<body>
-  <app-root><div id="loading" style="white-space:pre-line">Loading...</div></app-root>
-  <script>
-    var ver = navigator.userAgent;
-    var isIE = ver.indexOf("MSIE") !== -1 || ver.indexOf("Trident") !== -1;
-    if (isIE) {
-      var loading = document.getElementById("loading");
-      loading.textContent = "Your Web browser does not meet the minimum requirements to run CutePDF Editor.\nPlease use a new browser like Microsoft Edge, Chrome, Safari or Firefox.";
+<link rel="stylesheet" href="http://iblogbox.github.io/js/pdfviewer/viewer_1.3.91.css"/>
+<link rel="resource" type="application/l10n" href="locale/locale.properties"/>
+<script>
+var gworkerSrc='http://pdfviewer.softgateon.net/worker_1.3.91.js';
+var gcMapUrl='http://pdfviewer.softgateon.net/cmaps/';
+</script>
+<script src="http://iblogbox.github.io/js/pdfviewer/all_1.3.91.js"></script>
+<script src="http://iblogbox.github.io/js/pdfviewer/viewer_1.3.91.js"></script>
+<script src="http://iblogbox.github.io/js/pdfviewer/pdf.worker_1.3.91.js"></script>
+<style>
+body{
+	font-family: Arial, Helvetica, sans-serif;
+}
+.mybtn{
+	padding:1px 5px;
+}
+.mlink{font-size:15px;color:#0000ff}
+</style>
+<script>
+var guniq=(new Date()).getTime();
+var g_extensionok=false;
+var g_timer,g_lastprogress;
+
+window.addEventListener("message", function(event) {
+	if(event.source != window) return;	
+	var a=event.data;
+	if(!a.type) return;
+	if(a.type=="test_ok"){
+		g_extensionok=true;
+	}
+	if(a.guniq!=guniq)return;	
+	if(a.type=="blob_file"){
+		_getid("downloading").style.display='none';
+		if(a.bloburl){
+			PDFView.open(a.bloburl, 0, null, null, null, a.surl);
+		}else if(a.error){
+			alert(a.error);
+		}
+	}else if(a.type=="progress"){
+		//console.log(a);
+		if(g_lastprogress){
+			var elaspetime = new Date();
+			var dt=(elaspetime.getTime()-g_lastprogress)/1000;
+			if(dt<1)return;
+			g_lastprogress=elaspetime.getTime();
+			var c=_getid("downloading");
+			if(c.style.display!='') c.style.display='';
+		}
+		var c=_getid('downstate');
+		if(c){
+			var total=a.totalSize || a.total || 0;
+			var current=a.position || a.loaded || 0;
+			c.innerHTML='Downloading... ('+number_format(current)+'/'+number_format(total)+')';
+		}
+	}
+},false);
+function proc_get_blob_file(file){
+	clearTimeout(g_timer);
+	g_timer=setTimeout(function(){
+		if(!g_extensionok){
+			var resp={};
+			resp.fileSize=0;
+			resp.title=file;
+			resp.forcemimetype='application/pdf';
+			gd_download('https://speedtesting.herokuapp.com/proxyrss/geturl2.php?max='+gmaxdown+'&url='+encodeURIComponent(file), resp);
+					}
+	},2000);
+	guniq=(new Date()).getTime();
+	g_lastprogress=(new Date()).getTime();
+	window.postMessage({type:"get_blob_file", surl:file, guniq:guniq}, "*");
+}
+
+function proc_beforeprint(evt){
+}
+function proc_afterPrint(evt){
+}
+
+var gmaxdown=10;
+function init(){
+  document.getElementById('viewBookmark').setAttribute('hidden', 'true');
+  document.getElementById('secondaryViewBookmark').setAttribute('hidden', 'true');
+  document.getElementById('presentationMode').setAttribute('hidden', 'true');
+  document.getElementById('secondaryPresentationMode').setAttribute('hidden', 'true');
+
+	window.postMessage({type:"test", guniq:guniq}, "*");
+	window.addEventListener('resize', proc_resize);
+	proc_resize();
+	_getid("openURL").onclick=function(){
+		var s1='Enter a PDF URL.';
+		if(!g_extensionok){
+			//\nIf you install PDF Viewer extension (Chrome), You can download the PDF file without size limt.
+			s1='Enter a PDF URL. \n\nThe maximum download size is about '+gmaxdown+' megabytes.';
+			if(ismsie) s1=s1.replace(/\n/g,'');
+		}
+		var s=getstorage('c_lasturl') || '';
+		var surl=prompt(s1,s);			
+		if(!surl)return;
+		setstorage('c_lasturl',surl);
+		if(g_extensionok){
+			proc_get_blob_file(surl);
+		}else{
+			var resp={};
+			resp.fileSize=0;
+			resp.title=surl;
+			resp.forcemimetype='application/pdf';
+			gd_download('https://speedtesting.herokuapp.com/proxyrss/geturl2.php?max='+gmaxdown+'&url='+encodeURIComponent(surl), resp);
+		}
+	};
+	_getid("viewDefaultViewer").onclick=function(){
+		if(PDFJS.disableCreateObjectURL){//issafari
+			alert('Not supported on this browser');
+			return;
+		}
+		if(SecondaryToolbar) SecondaryToolbar.close();
+		if(g_last_blob_url && g_last_blob_url.indexOf("blob:")==0){
+			window.open(g_last_blob_url);
+		}else{
+			alert('Error!! Can not find a file data.');
+		}
+	};	
+	_getid('saveimage').onclick=function(){
+		if(!PDFViewerApplication || !PDFViewerApplication.pdfViewer){
+			return;
+		}
+		if(!window.URL){
+			alert("This browser does not support.");return;
+		}
+		var pagenum=PDFViewerApplication.pdfViewer.currentPageNumber;
+		var b=_getid('pageContainer'+pagenum);
+		if(!b){
+			alert("Can not find a page.");return;
+		}
+		var a=b.getElementsByTagName('CANVAS');
+		if(!a || a.length==0){
+			alert("Can not find a page.");return;
+		}
+		//var fname=getfilename(document.title || '');
+		var url = (PDFViewerApplication.url || '').split('#')[0];
+	    var fname=getfilename(getPDFFileNameFromURL(url));
+
+		fname=fname+'_Page_'+pagenum;
+		var strMime, filename;
+		if(!glastformat){
+			var answer=confirm(fname+"\nSelect the image format to be saved.\nOK: PNG, Cancel: JPG (Selected value will keep until the web page is reloaded)");
+			if(answer) strMime='image/png';
+			else strMime='image/jpeg';
+			glastformat=strMime;
+		}else{
+			strMime=glastformat;
+		}		
+		if(strMime=='image/png') filename=fname+'.png';
+		else filename=fname+'.jpg';
+
+		var strData=a[0].toDataURL(strMime);	
+		var blob=b64toBlob(strData.substr(strData.indexOf(",")+1,strData.length), strMime);
+		if(glastbloburl) window.URL.revokeObjectURL(glastbloburl);
+		glastbloburl=window.URL.createObjectURL(blob);
+
+		if(navigator.msSaveBlob){
+			navigator.msSaveBlob(blob, filename);
+			return;
+		}
+		var link=_getid('tempdownlink');
+		if(!link || !link.click || !('download' in link) || issafari){
+			window.open(glastbloburl);
+		}else{
+			link.download=filename;
+			link.href=glastbloburl;
+			link.target="_blank";
+			link.click();
+		}
+	};
+}
+var glastbloburl, glastformat;
+function b64toBlob(b64Data, contentType, sliceSize) {
+    contentType = contentType || '';
+    sliceSize = sliceSize || 512;
+
+    var byteCharacters = atob(b64Data);
+    var byteArrays = [];
+
+    for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+        var slice = byteCharacters.slice(offset, offset + sliceSize);
+
+        var byteNumbers = new Array(slice.length);
+        for (var i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+        }
+        var byteArray = new Uint8Array(byteNumbers);
+        byteArrays.push(byteArray);
     }
-  </script>
-<script type="text/javascript" src="runtime.70160fd61e695aff9b1e.js"></script><script type="text/javascript" src="polyfills.32ee1ff7f2c3d661aa1a.js"></script><script type="text/javascript" src="main.5c8c6893f67b05d6a98b.js"></script></body>
+    var blob = new Blob(byteArrays, {type: contentType});
+    return blob;
+}
+function getfilename(s){
+	var arr=s.split('.');
+	if(arr.length>1){
+		arr.splice(arr.length-1,1);
+	}
+	return arr.join('.');
+}
+
+function setstorage(name,value){
+	if (window.localStorage){
+		localStorage[name]=value+'';
+	}else{
+		//setCookie(name, value, 1000*60*60*24*365*10); 
+	}
+}
+function getstorage(name){
+	var s;
+	if (window.localStorage){
+		s=localStorage[name];
+	}else{
+		//s=getCookie(name);
+	}
+	return s;
+}
+function getWindowHeight(){
+    var windowHeight = 0;
+    if (typeof(window.innerHeight) == 'number'){
+        windowHeight = window.innerHeight;
+    }else{
+        var ieStrict = document.documentElement.clientHeight; 
+        var ieQuirks = document.body.clientHeight;
+        windowHeight = (ieStrict > 0) ? ieStrict : ieQuirks;
+    }
+	if(!windowHeight) windowHeight=0;
+    return windowHeight;
+}
+function proc_resize(){
+}
+function number_format (number, decimals, dec_point, thousands_sep) {
+	if(!number)return 0;
+  number = (number + '').replace(/[^0-9+\-Ee.]/g, '');
+  var n = !isFinite(+number) ? 0 : +number,
+    prec = !isFinite(+decimals) ? 0 : Math.abs(decimals),
+    sep = (typeof thousands_sep === 'undefined') ? ',' : thousands_sep,
+    dec = (typeof dec_point === 'undefined') ? '.' : dec_point,
+    s = '',
+    toFixedFix = function (n, prec) {
+      var k = Math.pow(10, prec);
+      return '' + Math.round(n * k) / k;
+    };
+  // Fix for IE parseFloat(0.55).toFixed(0) = 0;
+  s = (prec ? toFixedFix(n, prec) : '' + Math.round(n)).split('.');
+  if (s[0].length > 3) {
+    s[0] = s[0].replace(/\B(?=(?:\d{3})+(?!\d))/g, sep);
+  }
+  if ((s[1] || '').length < prec) {
+    s[1] = s[1] || '';
+    s[1] += new Array(prec - s[1].length + 1).join('0');
+  }
+  return s.join(dec);
+}
+
+function getWindowWidth(){
+    var windowWidth = 0;
+    if (typeof(window.innerWidth) == 'number'){
+        windowWidth = window.innerWidth;
+    }else{
+        var ieStrict = document.documentElement.clientWidth;
+        var ieQuirks = document.body.clientWidth; 
+        windowWidth = (ieStrict > 0) ? ieStrict : ieQuirks;
+    }
+	if(!windowWidth) windowWidth=0;
+    return windowWidth;
+}
+function getWindowHeight(){
+    var windowHeight = 0;
+    if (typeof(window.innerHeight) == 'number'){
+        windowHeight = window.innerHeight;
+    }else{
+        var ieStrict = document.documentElement.clientHeight; 
+        var ieQuirks = document.body.clientHeight;
+        windowHeight = (ieStrict > 0) ? ieStrict : ieQuirks;
+    }
+	if(!windowHeight) windowHeight=0;
+    return windowHeight;
+}
+function getScrollLeft(){
+    var scrollLeft;
+	if(document.body && document.body.scrollLeft){
+		scrollLeft = document.body.scrollLeft;
+	}else if(document.documentElement && document.documentElement.scrollLeft){
+		scrollLeft = document.documentElement.scrollLeft;
+	}
+	if(!scrollLeft) scrollLeft=0;
+    return scrollLeft;
+}
+function getScrollTop(){
+    var scrollTop;
+	if(document.body && document.body.scrollTop){
+		scrollTop = document.body.scrollTop;
+	}else if(document.documentElement && document.documentElement.scrollTop){
+		scrollTop = document.documentElement.scrollTop;
+	}
+	if(!scrollTop) scrollTop=0;
+    return scrollTop;
+} 
+
+Date.prototype.setISO8601 = function (timestamp) {
+ var match = timestamp.match(
+  "^([-+]?)(\\d{4,})(?:-?(\\d{2})(?:-?(\\d{2})" +
+  "(?:[Tt ](\\d{2})(?::?(\\d{2})(?::?(\\d{2})(?:\\.(\\d{1,3})(?:\\d+)?)?)?)?" +
+  "(?:[Zz]|(?:([-+])(\\d{2})(?::?(\\d{2}))?)?)?)?)?)?$");
+ if (match) {
+  for (var ints = [2, 3, 4, 5, 6, 7, 8, 10, 11], i = ints.length - 1; i >= 0; --i)
+   match[ints[i]] = (typeof match[ints[i]] != "undefined"
+    && match[ints[i]].length > 0) ? parseInt(match[ints[i]], 10) : 0;
+  if (match[1] == '-') // BC/AD
+   match[2] *= -1;
+  var ms = Date.UTC(
+   match[2], // Y
+   match[3] - 1, // M
+   //match[3], // M
+   match[4], // D
+   match[5], // h
+   match[6], // m
+   match[7], // s
+   match[8] // ms
+  );
+  if (typeof match[9] != "undefined" && match[9].length > 0) // offset
+   ms += (match[9] == '+' ? -1 : 1) *
+    (match[10]*3600*1000 + match[11]*60*1000); // oh om
+  if (match[2] >= 0 && match[2] <= 99) // 1-99 AD
+   ms -= 59958144000000;
+  this.setTime(ms);
+  return this;
+ }
+ else
+  return null;
+}
+</script>
+</head>
+<body tabindex="1" onload="">
+<script type="text/javascript" src="https://js.live.net/v5.0/OneDrive.js" id="onedrive-js" client-id="0000000048160954"></script>
+<style>
+#gd_progress{
+	font-size:15px;
+}
+.gd_div{background-color:#FFFFE1;position:absolute;overflow:hidden;-webkit-box-shadow: 0 0 25px #999;-moz-box-shadow: 0 0 25px #999;box-shadow: 0 0 25px #999;}
+</style>
+
+	<div id="downloading" class="gd_div" style="display:none;padding:5px;z-index:100000;position:absolute;left:10px;top:52px;border:1px solid #000000;">
+		<div id='downstate' style="font-size:15px;color:black;">Downloading...</div>
+	</div>
+
+    <div id="outerContainer" class="loadingInProgress">
+	  <div id="sidebarContainer">
+        <div id="toolbarSidebar">
+          <div class="splitToolbarButton toggled">
+            <button id="viewThumbnail" class="toolbarButton group toggled" title="Show Thumbnails" tabindex="2" data-l10n-id="thumbs">
+               <span data-l10n-id="thumbs_label">Thumbnails</span>
+            </button>
+            <button id="viewOutline" class="toolbarButton group" title="Show Document Outline" tabindex="3" data-l10n-id="outline">
+               <span data-l10n-id="outline_label">Document Outline</span>
+            </button>
+            <button id="viewAttachments" class="toolbarButton group" title="Show Attachments" tabindex="4" data-l10n-id="attachments">
+               <span data-l10n-id="attachments_label">Attachments</span>
+            </button>
+          </div>
+        </div>
+        <div id="sidebarContent">
+          <div id="thumbnailView">
+          </div>
+          <div id="outlineView" class="hidden">
+          </div>
+          <div id="attachmentsView" class="hidden">
+          </div>
+        </div>
+      </div>  <!-- sidebarContainer -->
+
+      <div id="mainContainer">
+        <div class="findbar hidden doorHanger hiddenSmallView" id="findbar">
+          <label for="findInput" class="toolbarLabel" data-l10n-id="find_label">Find:</label>
+          <input id="findInput" class="toolbarField" tabindex="91">
+          <div class="splitToolbarButton">
+            <button class="toolbarButton findPrevious" title="" id="findPrevious" tabindex="92" data-l10n-id="find_previous">
+              <span data-l10n-id="find_previous_label">Previous</span>
+            </button>
+            <div class="splitToolbarButtonSeparator"></div>
+            <button class="toolbarButton findNext" title="" id="findNext" tabindex="93" data-l10n-id="find_next">
+              <span data-l10n-id="find_next_label">Next</span>
+            </button>
+          </div>
+          <input type="checkbox" id="findHighlightAll" class="toolbarField">
+          <label for="findHighlightAll" class="toolbarLabel" tabindex="94" data-l10n-id="find_highlight">Highlight all</label>
+          <input type="checkbox" id="findMatchCase" class="toolbarField">
+          <label for="findMatchCase" class="toolbarLabel" tabindex="95" data-l10n-id="find_match_case_label">Match case</label>
+          <span id="findMsg" class="toolbarLabel"></span>
+        </div>  <!-- findbar -->
+
+        <div id="secondaryToolbar" class="secondaryToolbar hidden doorHangerRight">
+          <div id="secondaryToolbarButtonContainer">
+            <button id="secondaryPresentationMode" class="secondaryToolbarButton presentationMode visibleLargeView" title="Switch to Presentation Mode" tabindex="51" data-l10n-id="presentation_mode">
+              <span data-l10n-id="presentation_mode_label">Presentation Mode</span>
+            </button>
+
+            <button id="secondaryOpenFile" class="secondaryToolbarButton openFile visibleLargeView" title="Open File" tabindex="52" data-l10n-id="open_file">
+              <span data-l10n-id="open_file_label">Open</span>
+            </button>
+
+            <button id="secondaryPrint" class="secondaryToolbarButton print visibleMediumView" title="Print" tabindex="53" data-l10n-id="print">
+              <span data-l10n-id="print_label">Print</span>
+            </button>
+
+            <button id="secondaryDownload" class="secondaryToolbarButton download visibleMediumView" title="Download" tabindex="54" data-l10n-id="download">
+              <span data-l10n-id="download_label">Download</span>
+            </button>
+
+            <a href="#" id="secondaryViewBookmark" class="secondaryToolbarButton bookmark visibleSmallView" title="Current view (copy or open in new window)" tabindex="55" data-l10n-id="bookmark">
+              <span data-l10n-id="bookmark_label">Current View</span>
+            </a>
+
+            <div class="horizontalToolbarSeparator visibleLargeView"></div>
+
+            <button onclick="gd_open_picker()" id='btn_open' class="secondaryToolbarButton openFile" title="Select PDF file from Google Drive" tabindex="56">
+                <span data-l10n-id="view_selectGDrive_label">Select from Google Drive</span>
+             </button>
+            <button onclick="open_dropbox()" class="secondaryToolbarButton openFile" title="Select PDF file from Dropbox" tabindex="56">
+                <span data-l10n-id="view_selectDropbox_label">Select from Dropbox</span>
+             </button>
+            <button onclick="open_onedrive()" class="secondaryToolbarButton openFile" title="Select PDF file from MS OneDrive" tabindex="56">
+                <span data-l10n-id="view_selectOneDrive_label">Select from MS OneDrive</span>
+             </button>
+            <button onclick="open_box()" class="secondaryToolbarButton openFile" title="Select PDF file from Box" tabindex="56">
+                <span data-l10n-id="view_selectBox_label">Select from Box</span>
+             </button>
+
+			 <div class="horizontalToolbarSeparator"></div>
+
+            <button id="firstPage" class="secondaryToolbarButton firstPage" title="Go to First Page" tabindex="56" data-l10n-id="first_page">
+              <span data-l10n-id="first_page_label">Go to First Page</span>
+            </button>
+            <button id="lastPage" class="secondaryToolbarButton lastPage" title="Go to Last Page" tabindex="57" data-l10n-id="last_page">
+              <span data-l10n-id="last_page_label">Go to Last Page</span>
+            </button>
+
+            <div class="horizontalToolbarSeparator"></div>
+
+            <button id="pageRotateCw" class="secondaryToolbarButton rotateCw" title="Rotate Clockwise" tabindex="58" data-l10n-id="page_rotate_cw">
+              <span data-l10n-id="page_rotate_cw_label">Rotate Clockwise</span>
+            </button>
+            <button id="pageRotateCcw" class="secondaryToolbarButton rotateCcw" title="Rotate Counterclockwise" tabindex="59" data-l10n-id="page_rotate_ccw">
+              <span data-l10n-id="page_rotate_ccw_label">Rotate Counterclockwise</span>
+            </button>
+
+            <div class="horizontalToolbarSeparator"></div>
+
+            <button id="viewDefaultViewer" class="secondaryToolbarButton viewDefaultViewer" title="View in browser's default PDF viewer" tabindex="56">
+                <span data-l10n-id="view_DefaultViewer_label">View in Default Viewer</span>
+             </button>
+
+            <button id="toggleHandTool" class="secondaryToolbarButton handTool" title="Enable hand tool" tabindex="60" data-l10n-id="hand_tool_enable">
+              <span data-l10n-id="hand_tool_enable_label">Enable hand tool</span>
+            </button>
+            
+            <div class="horizontalToolbarSeparator"></div>
+
+            <button id="documentProperties" class="secondaryToolbarButton documentProperties" title="Document Properties…" tabindex="61" data-l10n-id="document_properties">
+              <span data-l10n-id="document_properties_label">Document Properties…</span>
+            </button>
+          </div>
+        </div>  
+
+        <div class="toolbar">
+          <div id="toolbarContainer">
+            <div id="toolbarViewer">
+              <div id="toolbarViewerLeft">
+                <button id="sidebarToggle" class="toolbarButton" title="Toggle Sidebar" tabindex="11" data-l10n-id="toggle_sidebar">
+                  <span data-l10n-id="toggle_sidebar_label">Toggle Sidebar</span>
+                </button>
+                <div class="toolbarButtonSpacer"></div>
+                <button id="viewFind" class="toolbarButton group hiddenSmallView" title="Find in Document" tabindex="12" data-l10n-id="findbar">
+                   <span data-l10n-id="findbar_label">Find</span>
+                </button>
+                <div class="splitToolbarButton">
+                  <button class="toolbarButton pageUp" title="Previous Page" id="previous" tabindex="13" data-l10n-id="previous">
+                    <span data-l10n-id="previous_label">Previous</span>
+                  </button>
+                  <div class="splitToolbarButtonSeparator"></div>
+                  <button class="toolbarButton pageDown" title="Next Page" id="next" tabindex="14" data-l10n-id="next">
+                    <span data-l10n-id="next_label">Next</span>
+                  </button>
+                </div>
+                <label id="pageNumberLabel" class="toolbarLabel" for="pageNumber" data-l10n-id="page_label">Page: </label>
+                <input type="number" id="pageNumber" class="toolbarField pageNumber" value="1" size="4" min="1" tabindex="15">
+                <span id="numPages" class="toolbarLabel"></span>
+              </div>
+              <div id="toolbarViewerRight">
+                <button id="presentationMode" class="toolbarButton presentationMode hiddenLargeView" title="Switch to Presentation Mode" tabindex="31" data-l10n-id="presentation_mode">
+                  <span data-l10n-id="presentation_mode_label">Presentation Mode</span>
+                </button>
+
+                <button id="openFile" class="toolbarButton openFile hiddenLargeView" title="Open File" tabindex="32" data-l10n-id="open_file">
+                  <span data-l10n-id="open_file_label">Open</span>
+                </button>
+
+                <button id="print" class="toolbarButton print hiddenMediumView" title="Print" tabindex="33" data-l10n-id="print">
+                  <span data-l10n-id="print_label">Print</span>
+                </button>
+
+                <button id="download" class="toolbarButton download hiddenMediumView" title="Download" tabindex="34" data-l10n-id="download">
+                  <span data-l10n-id="download_label">Download</span>
+                </button>
+
+                <button id="openURL" class="toolbarButton openFile" title="Open URL" tabindex="35">
+                  <span>Open URL</span>
+                </button>
+                <button id="saveimage" class="toolbarButton download" title="Save the Current Page as Image" tabindex="35">
+                  <span>Save the Current Page as Image</span>
+                </button>
+
+                 <div class="toolbarButtonSpacer"></div> 
+                <a href="#" id="viewBookmark" class="toolbarButton bookmark hiddenSmallView" title="Current view (copy or open in new window)" tabindex="35" data-l10n-id="bookmark">
+                  <span data-l10n-id="bookmark_label">Current View</span>
+                </a>
+
+                <div class="verticalToolbarSeparator hiddenSmallView"></div>
+               
+                <button id="secondaryToolbarToggle" class="toolbarButton" title="Tools" tabindex="36" data-l10n-id="tools">
+                  <span data-l10n-id="tools_label">Tools</span>
+                </button> 
+              </div>
+              <div class="outerCenter">
+                <div class="innerCenter" id="toolbarViewerMiddle">
+                  <div class="splitToolbarButton">
+                    <button id="zoomOut" class="toolbarButton zoomOut" title="Zoom Out" tabindex="21" data-l10n-id="zoom_out">
+                      <span data-l10n-id="zoom_out_label">Zoom Out</span>
+                    </button>
+                    <div class="splitToolbarButtonSeparator"></div>
+                    <button id="zoomIn" class="toolbarButton zoomIn" title="Zoom In" tabindex="22" data-l10n-id="zoom_in">
+                      <span data-l10n-id="zoom_in_label">Zoom In</span>
+                     </button>
+                  </div>
+                  <span id="scaleSelectContainer" class="dropdownToolbarButton">
+                     <select id="scaleSelect" title="Zoom" tabindex="23" data-l10n-id="zoom">
+                      <option id="pageAutoOption" title="" value="auto" selected="selected" data-l10n-id="page_scale_auto">Automatic Zoom</option>
+                      <option id="pageActualOption" title="" value="page-actual" data-l10n-id="page_scale_actual">Actual Size</option>
+                      <option id="pageFitOption" title="" value="page-fit" data-l10n-id="page_scale_fit">Fit Page</option>
+                      <option id="pageWidthOption" title="" value="page-width" data-l10n-id="page_scale_width">Full Width</option>
+                      <option id="customScaleOption" title="" value="custom"></option>
+                      <option title="" value="0.5">50%</option>
+                      <option title="" value="0.75">75%</option>
+                      <option title="" value="1">100%</option>
+                      <option title="" value="1.25">125%</option>
+                      <option title="" value="1.5">150%</option>
+                      <option title="" value="2">200%</option>
+                      <option title="" value="3">300%</option>
+                      <option title="" value="4">400%</option>
+                    </select>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div id="loadingBar">
+              <div class="progress">
+                <div class="glimmer">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <menu type="context" id="viewerContextMenu">
+          <menuitem id="contextFirstPage" label="First Page"
+                    data-l10n-id="first_page"></menuitem>
+          <menuitem id="contextLastPage" label="Last Page"
+                    data-l10n-id="last_page"></menuitem>
+          <menuitem id="contextPageRotateCw" label="Rotate Clockwise"
+                    data-l10n-id="page_rotate_cw"></menuitem>
+          <menuitem id="contextPageRotateCcw" label="Rotate Counter-Clockwise"
+                    data-l10n-id="page_rotate_ccw"></menuitem>
+        </menu>
+
+        <div id="viewerContainer" tabindex="0">
+			<div id="viewer"></div>
+          <div id="viewer2">
+						<table id="desc" style="margin:20px;color:black;display:;font-size:15px;font-family: Arial, Helvetica, sans-serif;" width=750>
+			<tr><td>
+<button type="button" id="gd_btn_reopen" onclick="gd_reopen()" class="mybtn" style="display:none;margin-bottom:10px" title="Reopen the file loaded from drive.google.com"><img src="http://iblogbox.github.io/js/gdrive/product16.png" width=14 align="absmiddle"> Reopen</button>
+PDF Online Viewer, Reader is a free online tool that allows you to view PDF, DOC, XLS, PPT files directly in your web browser.<br>
+You don't need to install any further software to view files online.<br>
+PDF Viewer Online reads files without uploading the file to any servers. It does not save or share the file you select.<br>
+It only works locally without going through the server.<br>
+Supports convert DOC, DOCX, XLS, XLSX, PPT, PPTX file to PDF format using Google Drive Converter.<br>
+View, Print, and You can be downloaded as PDF.<br>
+<br>
+You can choose a PDF file to view from your computer or from Google Drive.<br>
+To open the file, Click the "File Open" icon on the toolbar or Drag & drop the file in this page.<br>
+Powered by HTML5 technology & Mozilla PDF Reader library<br>
+<br>
+*Supported Formats (Google Drive's files, Convert to PDF without uploading to any servers):<br>
+Documents (pdf, jpg, jpeg, png, gif, doc, docx, dot, dotx, docm, dotm, rtf, html, htm, txt, text, odt)<br>
+Presentation (ppt, pptx, pot, potx, pps, ppsx, pptm, potm, ppsm, odp)<br>
+Spreadsheet (xls, xlsx, xlt, xltx, xlsm, xltm, ods, csv, tsv)<br>
+The converted temporary files are automatically deleted randomly after a day in your trash folder.<br>
+<button type=button onclick="gd_convert('','getDeleteCache')" class="mybtn" style="font-size:13px">Delete All Temporary Files</button><br>
+<br>
+*Supported Formats (Local Computer, Dropbox, OneDrive, Box): PDF<br>
+<br>
+2020, PDF Viewer Online, Free Apps
+			</table>
+		  </div>
+        </div>
+
+        <div id="errorWrapper" hidden='true'>
+          <div id="errorMessageLeft">
+            <span id="errorMessage"></span>
+            <button id="errorShowMore" data-l10n-id="error_more_info">
+              More Information
+            </button>
+            <button id="errorShowLess" data-l10n-id="error_less_info" hidden='true'>
+              Less Information
+            </button>
+          </div>
+          <div id="errorMessageRight">
+            <button id="errorClose" data-l10n-id="error_close">
+              Close
+            </button>
+          </div>
+          <div class="clearBoth"></div>
+          <textarea id="errorMoreInfo" hidden='true' readonly="readonly"></textarea>
+        </div>
+      </div> <!-- mainContainer -->
+
+      <div id="overlayContainer" class="hidden">
+        <div id="passwordOverlay" class="container hidden">
+          <div class="dialog">
+            <div class="row">
+              <p id="passwordText" data-l10n-id="password_label">Enter the password to open this PDF file:</p>
+            </div>
+            <div class="row">
+              <input type="text" id="password" class="toolbarField" />
+            </div>
+            <div class="buttonRow">
+              <button id="passwordCancel" class="overlayButton"><span data-l10n-id="password_cancel">Cancel</span></button>
+              <button id="passwordSubmit" class="overlayButton"><span data-l10n-id="password_ok">OK</span></button>
+            </div>
+          </div>
+        </div>
+        <div id="documentPropertiesOverlay" class="container hidden">
+          <div class="dialog">
+            <div class="row">
+              <span data-l10n-id="document_properties_file_name">File name:</span> <p id="fileNameField">-</p>
+            </div>
+            <div class="row">
+              <span data-l10n-id="document_properties_file_size">File size:</span> <p id="fileSizeField">-</p>
+            </div>
+            <div class="separator"></div>
+            <div class="row">
+              <span data-l10n-id="document_properties_title">Title:</span> <p id="titleField">-</p>
+            </div>
+            <div class="row">
+              <span data-l10n-id="document_properties_author">Author:</span> <p id="authorField">-</p>
+            </div>
+            <div class="row">
+              <span data-l10n-id="document_properties_subject">Subject:</span> <p id="subjectField">-</p>
+            </div>
+            <div class="row">
+              <span data-l10n-id="document_properties_keywords">Keywords:</span> <p id="keywordsField">-</p>
+            </div>
+            <div class="row">
+              <span data-l10n-id="document_properties_creation_date">Creation Date:</span> <p id="creationDateField">-</p>
+            </div>
+            <div class="row">
+              <span data-l10n-id="document_properties_modification_date">Modification Date:</span> <p id="modificationDateField">-</p>
+            </div>
+            <div class="row">
+              <span data-l10n-id="document_properties_creator">Creator:</span> <p id="creatorField">-</p>
+            </div>
+            <div class="separator"></div>
+            <div class="row">
+              <span data-l10n-id="document_properties_producer">PDF Producer:</span> <p id="producerField">-</p>
+            </div>
+            <div class="row">
+              <span data-l10n-id="document_properties_version">PDF Version:</span> <p id="versionField">-</p>
+            </div>
+            <div class="row">
+              <span data-l10n-id="document_properties_page_count">Page Count:</span> <p id="pageCountField">-</p>
+            </div>
+            <div class="buttonRow">
+              <button id="documentPropertiesClose" class="overlayButton"><span data-l10n-id="document_properties_close">Close</span></button>
+            </div>
+          </div>
+        </div>
+      </div> 
+
+    </div>
+
+    <div id="printContainer"></div>
+<div id="mozPrintCallback-shim" hidden>
+  <style scoped>
+#mozPrintCallback-shim {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 9999999;
+
+  display: block;
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+#mozPrintCallback-shim[hidden] {
+  display: none;
+}
+@media print {
+  #mozPrintCallback-shim {
+    display: none;
+  }
+}
+
+#mozPrintCallback-shim .mozPrintCallback-dialog-box {
+  display: inline-block;
+  margin: -50px auto 0;
+  position: relative;
+  top: 45%;
+  left: 0;
+  min-width: 220px;
+  max-width: 400px;
+
+  padding: 9px;
+
+  border: 1px solid hsla(0, 0%, 0%, .5);
+  border-radius: 2px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+
+  background-color: #474747;
+
+  color: hsl(0, 0%, 85%);
+  font-size: 16px;
+  line-height: 20px;
+}
+#mozPrintCallback-shim .progress-row {
+  clear: both;
+  padding: 1em 0;
+}
+#mozPrintCallback-shim progress {
+  width: 100%;
+}
+#mozPrintCallback-shim .relative-progress {
+  clear: both;
+  float: right;
+}
+#mozPrintCallback-shim .progress-actions {
+  clear: both;
+}
+  </style>
+  <div class="mozPrintCallback-dialog-box">
+    
+    Preparing document for printing...
+    <div class="progress-row">
+      <progress value="0" max="100"></progress>
+      <span class="relative-progress">0%</span>
+    </div>
+    <div class="progress-actions">
+      <input type="button" value="Cancel" class="mozPrintCallback-cancel">
+    </div>
+  </div>
+</div>
+
+<script>
+init();
+</script>
+
+<div style="position:absolute;top:-1000px">
+	<a href="" id="tempdownlink">tempdownlink</a>
+</div>
+
+<div id="layer_message" class="gd_div" style="z-index:10001;display:none;"></div>
+<div id="gd_btn_login" class="gd_div" style="z-index:10000000;display:none;">
+<table>
+<tr><td align=center><button onclick="gd_login_manual()" class="mybtn" style="font-size:20px"><img src="http://iblogbox.github.io/js/gdrive/product20.png" align="absmiddle"> Login & Authorize</button> <button onclick="gd_login_close()" style="font-size:20px" class="mybtn">Close</button>
+<tr><td>To use this app, Please login to the Google Drive and authorize this app or website.
+<br>(Note: If your browser block or disable the third-party cookies, this login does not work correctly.)
+</table>
+</div>
+<script>
+var CLIENT_ID = '619241882594-1n9npcsqr6rklv5vnnivh9ne7cv7qh01.apps.googleusercontent.com';
+var gdevMode=false;
+var SCOPES = [
+	'https://www.googleapis.com/auth/drive.install',
+	'https://www.googleapis.com/auth/drive.file'
+];
+var gd_developerKey='AIzaSyCjhYQgCNp1ykrzCHDsb9N6tzxRGlpmEig';
+var gd_mimetype="";//application/pdf,application/vnd.google-apps.document,application/vnd.google-apps.kix,application/vnd.google-apps.spreadsheet,application/vnd.google-apps.presentation,application/vnd.google-apps.drawing,application/vnd.google.drive.ext-type.pdf
+var gd_export_extension=["pdf"];
+var gd_state='';
+
+var gd_picker,gd_loaded,gd_pickerloaded,gd_lastprogress,gd_issupported,gd_isdownloading,gd_load_timer,gd_state2;
+var gd_loginexp=0;
+var gd_callback;
+var ismsie=false;
+if(navigator.appName!="Netscape"){
+	if(navigator.userAgent.indexOf("MSIE")>=0) ismsie=true;
+}
+if(navigator.userAgent.match(/Trident\//)) ismsie=true;
+
+function gd_btn_login2(e,callback){
+	function go(a){
+		if(a && a.style.display==''){
+			var x=getScrollLeft()+((getWindowWidth()-a.clientWidth) / 2);
+			var y=getScrollTop()+((getWindowHeight()-a.clientHeight) / 2);
+			a.style["border"]="1px solid #000000";
+			a.style["padding"]="10px";
+			a.style.left=x+"px";
+			a.style.top=y+"px";
+		}
+	}
+	go(_getid("gd_btn_login"));
+	setTimeout(function(){
+		go(_getid("gd_btn_login"));
+		if(callback)callback();
+	},10);
+}
+function gd_btn_login(isshow){
+	var a=_getid("gd_btn_login");
+	if(isshow){
+		a.style.display='';
+		gd_btn_login2();
+	}else{
+		a.style.display='none';
+	}
+}
+function gd_login_close(){
+	gd_btn_login(false);
+	gd_state='';
+}
+function gd_login_manual(){
+	var p={'client_id': CLIENT_ID, 'scope': SCOPES.join(' '), 'immediate': false};
+	if(gd_userId){p['login_hint']=gd_userId;p['authuser']=-1;}
+	gapi.auth.authorize(p, function (authResult){ 
+		if (authResult && !authResult.error){
+			gd_loginexp=(new Date()).getTime()+parseInt(authResult.expires_in*0.7*1000);
+			gd_btn_login(false);gd_info();
+			show_message("Login ok!!");
+			if(gd_callback) gd_callback(true);
+			else gd_open_state();
+		}else{
+			gd_btn_login(true);
+			show_message("Login failed!!");
+		}
+	});
+}
+function gd_login(callback,react){
+	if(gd_loginexp==0 || gd_loginexp<(new Date()).getTime()){
+	}else{
+		callback(true);
+		return;
+	}
+	var p={'client_id': CLIENT_ID, 'scope': SCOPES.join(' '), 'immediate': true};
+	if(gd_userId){p['login_hint']=gd_userId;p['authuser']=-1;}
+	gapi.auth.authorize(p, function (authResult){
+		if (authResult && !authResult.error){
+			gd_loginexp=(new Date()).getTime()+parseInt(authResult.expires_in*0.7*1000);
+			gd_btn_login(false);gd_info();
+			callback(true);
+		}else{
+			show_message("Login failed!!");
+			gd_btn_login(true);
+			callback(false);
+			if(react) gd_callback=callback;
+			else gd_callback=null;
+		}
+	});
+}
+
+function gd_loadpicker() {		
+	gapi.load('picker',{'callback': function(){
+			gd_pickerloaded=true;
+		}
+	});	
+}
+function gd_createpicker() {
+	var access_token=gapi.auth.getToken().access_token;
+	if(!access_token){
+		alert('Error!! No access token.');
+		return;
+	}
+	if(!gd_picker){
+      //var view = new google.picker.View(google.picker.ViewId.DOCS);
+	  var view2 = new google.picker.DocsView(google.picker.ViewId.DOCS);
+	  if(gd_mimetype) view2.setMimeTypes(gd_mimetype);
+	  view2.setMode(google.picker.DocsViewMode.LIST);
+
+		var view4 = new google.picker.DocsView();
+		view4.setIncludeFolders(true);
+		view4.setParent("root");
+		view4.setMimeTypes(gd_mimetype);
+		view4.setMode(google.picker.DocsViewMode.LIST);
+		var view5 = new google.picker.View(google.picker.ViewId.RECENTLY_PICKED);
+
+      gd_picker = new google.picker.PickerBuilder()
+          //.enableFeature(google.picker.Feature.NAV_HIDDEN)
+          //.enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
+		  .setLocale(window.navigator.language || window.navigator.userLanguage || "en")
+		  .setAppId(CLIENT_ID.split("-")[0]) //scope
+          .setOAuthToken(access_token)
+          .addView(view2)
+		  .addView(view4)
+		  .addView(view5)
+          .addView(new google.picker.DocsUploadView())
+          .setDeveloperKey(gd_developerKey)
+          .setCallback(gd_pickercallback)
+          .build();
+	}
+	gd_picker.setVisible(true);
+}
+function gd_pickercallback(data) {
+	if (data.action == google.picker.Action.PICKED) {
+		if(data.docs && data.docs.length>0 && data.docs[0].id){
+	        var fileId = data.docs[0].id;
+			if(data.viewToken && data.viewToken[0] && data.viewToken[0]=='upload') gd_loadfile(fileId,true);
+			else gd_loadfile(fileId);
+		}
+	}
+}
+function gd_loadfile(fileId, isupload){
+	if(gd_isdownloading){
+		alert("It's working. Please try again later. or Cancel the current job.");
+		return;
+	}
+	show_message("<table><tr><td><div id='gd_progress'>Ready...</div></table>",'','','',1000*30);
+	gapi.client.load('drive', 'v2', function() {
+		var request = gapi.client.drive.files.get({
+			'fileId': fileId
+		});
+		request.execute(function(resp){
+			function end(){
+				gd_isdownloading=false;
+				clearTimeout(messagetimer);
+				hide_message();				
+				proc_uploaded(resp);
+			}
+			function error(s){
+				alert(s);
+			}
+			//console.log(resp);
+			resp.isupload=isupload;
+
+			var downloadurl;
+			if(resp.downloadUrl){
+				downloadurl='https://www.googleapis.com/drive/v2/files/'+resp.id+'?alt=media';//resp.downloadUrl;
+			}else if(resp.exportLinks){
+				for (x in resp.exportLinks){	
+					for(var i = 0; i < gd_export_extension.length; i++){    
+						if(x.toLowerCase().indexOf(gd_export_extension[i])>=0){
+							//downloadurl=resp.exportLinks[x];
+							downloadurl='https://www.googleapis.com/drive/v2/files/'+resp.id+'/export?mimeType='+encodeURIComponent(x);
+							resp.title=resp.title+'.pdf';
+							break;
+						}						
+					}					
+					if(downloadurl)break;
+				}
+			}
+			var accessToken = gapi.auth.getToken().access_token;
+			if(!accessToken){
+				end();
+				alert('Error!! No access token.');
+				return;
+			}
+			if(downloadurl){		
+				var ext=getfileext(resp.title || '');
+				if(ext=='pdf' || (resp.mimeType && resp.mimeType.indexOf("/pdf")>=0)){
+					gd_download(downloadurl,resp,accessToken);
+					gd_removecaches(true);
+				}else{
+					if(issupportformat(ext)){
+						gd_convert(resp);
+					}else{
+						var answer=confirm(resp.title+"\n\nThis file is an unsupported format.\n\nJust ignore it and Do you want to convert this file to PDF?");
+						if(answer) gd_convert(resp);
+						else{
+							end();
+							gd_removecaches(true);
+						}
+					}				
+				}
+			}else{
+				end();
+				if(resp.error && resp.error.message){
+					alert(resp.error.message);
+				}else{
+					alert('Error!! Can not find a download URL.');
+				}
+				gd_removecaches(true);
+			}
+		});
+	});
+}
+
+function gd_download(downloadurl,resp,accessToken,useretry,retrycount){
+	if(!retrycount) retrycount=0;
+	if(retrycount==0 && gd_isdownloading){
+		alert("It's working. Please try again later. or Cancel the current job.");
+		return;
+	}
+			function end(){
+				gd_isdownloading=false;
+				clearTimeout(messagetimer);
+				hide_message();
+				proc_uploaded(resp);
+			}
+			function error(s){
+				alert(s);
+			}
+					gd_isdownloading=true;
+					show_message("<table><tr><td><div id='gd_progress'>Downloading...</div><td>&nbsp; <a href='#' id='gd_cancel' style='font-size:15px;color:#0000ff'>Cancel</a></table>",'','','',1000*60*60*24*2);
+				    var xhr = new XMLHttpRequest();
+					var c=_getid('gd_cancel');
+					if(c){
+						c.onclick=function(){
+							xhr.abort(); 
+							end();
+							return false;
+						}
+					}
+					gd_lastprogress=(new Date()).getTime();
+					var su=downloadurl;
+					if(accessToken){
+						//su+='&access_token='+encodeURIComponent(accessToken);
+						/*if(resp.mimeType=='application/vnd.google-apps.spreadsheet'){
+							su='https://speedtesting.herokuapp.com/proxyrss/geturl2.php?max=12&url='+encodeURIComponent(su);
+							resp.forcemimetype='application/pdf';
+						}*/
+					}
+					xhr.open('GET', su);
+					if(issafari || resp.forcemimetype) xhr.responseType = 'arraybuffer';
+					else xhr.responseType = 'blob';
+					xhr.onprogress=function(event){
+						if(gd_lastprogress){
+							var elaspetime = new Date();
+							var dt=(elaspetime.getTime()-gd_lastprogress)/1000;
+							if(dt<1)return;
+							gd_lastprogress=elaspetime.getTime();
+						}
+						var a=event;
+						var total=a.totalSize || resp.fileSize || a.total || 0;
+						if(total>=18446744073709552000) total=0;
+						var current=a.position || a.loaded  || 0;
+						var c=_getid('gd_progress');
+						if(c) c.innerHTML='Downloading... ('+number_format(current)+'/'+number_format(total)+')';
+					};
+					if(accessToken)xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+				    xhr.onload = function(){
+						//if((this.status==404 || (this.status == 200 && resp.mimeType=='application/vnd.google-apps.spreadsheet' && (this.response || '').length==0)) && useretry && retrycount<=2){
+						if(this.status==404 && useretry && retrycount<=2){
+							retrycount++; setTimeout(function(){gd_download(downloadurl,resp,accessToken,true,retrycount);},1000);
+							return;
+						}
+						end();
+						if(this.status == 200){
+							if(issafari || resp.forcemimetype){	
+								if(resp.forcemimetype) var blob = new Blob([this.response], {type : resp.forcemimetype});
+								else var blob = new Blob([this.response]);
+								if(resp.forcemimetype && blob.size<6){
+									/*if(resp.mimeType=='application/vnd.google-apps.spreadsheet'){
+										show_message("<table><tr><td><font style='font-size:14px'>This file is invalid file, or It exceeds the file size limt. The maximum download size is about 12 megabytes.<br>Due to a bug, some Google spreadsheet format can not be downloaded directly in this app.<br>Please use the download link below. and Drag the downloaded file into this page.</font></table><table><tr><td><a a id='adownlink' style='font-size:17px;color:#0000ff'>Download this PDF file</a><td>&nbsp; <a href='#' onclick='clearTimeout(messagetimer);hide_message();return false;' style='font-size:15px;color:#0000ff'>Close</a></table>",'','','',1000*60*60*24*2);
+										var a=_getid("adownlink");
+										if(a){
+											a.target="_parent";
+											a.href=downloadurl;
+											var s=resp.title || resp.originalFilename;
+											a.download=s || "";
+										}
+									}else{*/
+										error('This file is a invalid file, or It exceeds the file size limt. The maximum download size is about '+gmaxdown+' megabytes.');
+									//}
+									return;
+								}
+							}else{
+								var blob = this.response;								
+							}
+							var s=window.URL.createObjectURL(blob);
+							var s1=resp.title || resp.originalFilename;
+							PDFView.open(s, 0, null, null, null, s1);
+						}else{
+							var s="Error (status) " + this.status + "("+this.statusText+") occurred while receiving the file.";
+							error(s);
+						}
+					};
+					xhr.onerror = function(e){      
+						if(e.target && e.target.status==404 && useretry && retrycount<=2){
+							retrycount++; setTimeout(function(){gd_download(downloadurl,resp,accessToken,true,retrycount);},1000);
+							return;
+						}
+						end();
+						var s="Error " + e.target.status + " occurred while receiving the file.";
+						error(s);
+											};
+					xhr.send();
+}
+
+function gd_open_picker(){
+	if(SecondaryToolbar) SecondaryToolbar.close();
+	if(!gd_issupported){
+		alert("This browser does not support.");
+		return;
+	}
+	if(!gd_loaded || !gd_pickerloaded){
+		if(!gd_load_timer) gd_loadscript(gd_open_picker);
+		else alert('Not loaded library. Please try again in a few minutes.');
+		return;
+	}
+	gd_login(function(result){
+		if(!result) return;
+		gd_createpicker();
+		gd_removecaches(true);
+	},true);
+}
+function gd_getparam(s,name){
+	name=name+"=";
+	name=name.toLowerCase();
+	var p1=s.toLowerCase().indexOf(name);
+	if (p1<0) return "";
+	s=s.substr(p1+name.length);
+	var p2=s.toLowerCase().indexOf("&");
+	if (p2>=0) {
+		return s.substr(0,p2);
+	} else {
+		return s;
+	}
+}
+function gd_open_state(){
+	var s=gd_state;
+	if(s){
+		if(!gd_issupported){
+			gd_state='';
+			alert("This browser does not support.");
+			return;
+		}
+		s=decodeURIComponent(s);
+		try{
+			var a=JSON.parse(s);
+			var fileId;
+			if(a.ids) fileId=a.ids[0];
+			if(!fileId && a.exportIds) fileId=a.exportIds[0];
+			if(fileId){
+				gd_login(function(result){
+					if(!result) return;
+					//_getid('gd_btn_reopen').style.display='block';
+					gd_state='';
+					gd_loadfile(fileId);
+				});				
+			}
+		}catch(err){
+		}
+	}
+}
+function gd_clientload(){
+	gd_loaded=true;
+	if (window.addEventListener){
+		window.addEventListener("resize", gd_btn_login2, false);
+	}else if (window.attachEvent){
+		window.attachEvent("onresize", gd_btn_login2);
+	}
+	gd_open_state();
+}
+function gd_loadscript(callback){
+	function inject(s){
+		var o = document.createElement('scri' + 'pt');
+		o.setAttribute('src', s);
+		o.setAttribute('type', 'text/javascript');
+		document.body.appendChild(o);
+	}
+	if(gd_load_timer)return;
+	if(gd_loaded && gd_pickerloaded)return;
+	gd_load_timer=setInterval(function(){
+		if(gd_loaded && gd_pickerloaded){
+			clearInterval(gd_load_timer);
+			if(callback) callback();
+		}
+	},100);
+	inject('https://apis.google.com/js/client.js?onload=gd_clientload');
+	inject('https://apis.google.com/js/api.js?onload=gd_loadpicker');	
+}
+function gd_reopen(){
+	if(gd_state2){
+		gd_state=gd_state2;
+		gd_open_state();
+		/*if(gd_getparam(location.href,'state')) 
+			location.href=location.href;
+		else 
+			location.href='?state='+encodeURIComponent(gd_state2);*/
+	}
+}
+var gd_userId,gd_email;
+function gd_weburl(){
+	var s;
+	if(gd_email) s='https://drive.google.com/?authuser='+gd_email;
+	else s='https://drive.google.com/';
+	return s;
+}
+function gd_info(){
+	if(gd_email)return;
+	gapi.client.load('drive', 'v2', function(){
+		var request = gapi.client.drive.about.get();
+		request.execute(function(resp) {
+			if(resp && resp.user){
+				if(gd_email)return;
+				gd_email=resp.user.emailAddress;
+				if(gd_email){
+					var a=_getid('btn_open');
+					var b=_getid('gd_btn_reopen');
+					if(a)a.title=a.title+' ('+gd_email+')';
+					if(b)b.title=b.title+' ('+gd_email+')';
+				}				
+			}
+		});
+	});
+}
+function gd_init(){
+	gd_state2=gd_state;
+	if(!window.FileReader || !window.URL || !window.XMLHttpRequest){
+	}else{
+		gd_issupported=true;
+		if(gd_state){
+			try{
+				var a=JSON.parse(gd_state);
+				gd_userId=a.userId;
+				if(a.ids || a.exportIds){
+					show_message("<table><tr><td><div id='gd_progress'>Ready...</div></table>",'','','',1000*30);
+				}
+			}catch(err){}						
+		}
+		gd_loadscript();
+		_getid('secondaryToolbarToggle').onclick=function(){
+			gd_loadscript2();
+		}
+	}
+}
+gd_init();
+
+var load_timer;
+function gd_loadscript2(){
+	function inject(s,params){
+		var o = document.createElement('scri' + 'pt');
+		o.setAttribute('src', s);
+		o.setAttribute('type', 'text/javascript');
+		for (var name in params){
+			o.setAttribute(name, params[name]);
+		}
+		document.body.appendChild(o);
+	}
+	if(load_timer)return;
+	load_timer=true;
+	inject('https://www.dropbox.com/static/api/2/dropins.js',{'id':'dropboxjs','data-app-key':"kr19li1hb5w4btr"});
+	//inject('https://js.live.net/v5.0/OneDrive.js',{'id':'onedrive-js','client-id':"0000000048160954"});
+	inject('https://app.box.com/js/static/select.js',{});
+}
+var dropboxOptions = {
+    success: function(files) {
+	  if(!files || files.length==0){
+		  show_message('Error!!');
+		  return;
+	  }
+	  var resp={};
+	  for(var i = 0; i <= files.length-1; i++){
+		  if(files[i].is_dir)continue;
+		  resp.fileSize=files[i].bytes;
+		  resp.title=files[i].name;
+		  gd_download(files[i].link, resp);
+		  break;
+	  }
+    },
+    cancel: function(){
+    },
+    linkType: "direct",
+    multiselect: false, 
+    extensions: ['.pdf'],
+};
+function open_dropbox(){
+	if(!gd_issupported){
+		alert("This browser does not support.");
+		return;
+	}
+	if(typeof Dropbox === 'undefined'){
+		if(load_timer){
+			alert('Not loaded library. Please try again in a few minutes.');
+			return;
+		}
+		gd_loadscript2();
+		load_timer=setInterval(function(){
+			if(typeof Dropbox !== 'undefined'){
+				clearInterval(load_timer);
+				show_message('Library loaded. Please Retry again.');
+			}
+		},100);
+		return;
+	}
+	if(SecondaryToolbar) SecondaryToolbar.close();
+	Dropbox.choose(dropboxOptions);
+}
+
+var onedriveOptions = {
+  success: function(files){
+	  if(!files || !files.values || files.values.length==0){
+		  show_message('Error!!');
+		  return;
+	  }
+	  var resp={};
+	  for(var i = 0; i <= files.values.length-1; i++){
+		  resp.fileSize=files.values[i].size;
+		  resp.title=files.values[i].fileName;
+		  //gd_download(files.values[i].link+'&download', resp);
+		  gd_download(files.values[i].link, resp);
+		  break;
+	  }
+  },
+  cancel: function() {
+  },
+  linkType: "downloadLink",
+  multiSelect: false
+}
+function open_onedrive(){
+	if(!gd_issupported){
+		alert("This browser does not support.");
+		return;
+	}
+	if(SecondaryToolbar) SecondaryToolbar.close();
+    OneDrive.open(onedriveOptions);
+}
+
+var boxOptions = {
+    clientId: 'c0d4g5gw4956htyb3snng9pl7uqdz0x6',
+    linkType: 'direct',
+    multiselect: false
+};
+var boxSelect;
+function init_box(){
+ if(!boxSelect){
+	boxSelect = new BoxSelect(boxOptions);
+	boxSelect.success(function(files) {
+	  if(!files || files.length==0){
+		  show_message('Error!!');
+		  return;
+	  }
+	  var resp={};
+	  for(var i = 0; i <= files.length-1; i++){
+		  if(files[i].is_dir)continue;
+		  resp.fileSize=files[i].size;
+		  resp.title=files[i].name;
+		  gd_download(files[i].url, resp);
+		  break;
+	  }
+	});
+	boxSelect.cancel(function() {
+	});
+ }
+}
+function open_box(){
+	if(!gd_issupported){
+		alert("This browser does not support.");
+		return;
+	}
+	if(typeof BoxSelect === 'undefined'){
+		if(load_timer){
+			alert('Not loaded library. Please try again in a few minutes.');
+			return;
+		}
+		gd_loadscript2();
+		load_timer=setInterval(function(){
+			if(typeof BoxSelect !== 'undefined'){
+				clearInterval(load_timer);
+				show_message('Library loaded. Please Retry again.');
+			}
+		},100);
+		return;
+	}
+	if(SecondaryToolbar) SecondaryToolbar.close();
+	init_box();
+	boxSelect.launchPopup();
+}
+</script>
+<script>
+
+
+
+var gformats='jpg,jpeg,png,gif,doc,docx,rtf,html,htm,txt,text,odt,ppt,pptx,odp,xls,xlsx,ods,csv,tsv,dot,dotx,xlt,xltx,pot,potx,pps,ppsx,xlsm,xltm,docm,dotm,pptm,potm,ppsm';
+function issupportformat(ext){
+	var gf=','+gformats+',';
+	if(gf.indexOf(','+ext+',')>=0) return true;
+	else return false;
+}
+function getfileext(s){
+	var arr=s.split('.');
+	if(arr.length>1){
+		return arr[arr.length-1].toLowerCase();
+	}
+	return '';
+}
+function getsize(fileSize){
+	if(!fileSize) return 'Unknown Size';
+	function humanFileSize(bytes){
+		var thresh = 1024;
+		if(bytes < thresh) return bytes + ' B';
+		var units = ['kB','MB','GB','TB','PB','EB','ZB','YB'];
+		var u = -1;
+		do {
+			bytes /= thresh;
+			++u;
+		} while(bytes >= thresh);
+		return bytes.toFixed(1)+' '+units[u];
+	}
+	return humanFileSize(fileSize);
+}
+function proc_delete(fileid){
+function go(){
+	if(!fileid) return;
+	if(gd_isdownloading){
+		alert("It's working... Please try again later. or Cancel the current job.");
+		return;
+	}	
+	var request = gapi.client.drive.files['delete']({
+		'fileId': fileid
+	});
+	request.execute(function(resp){
+		if(resp.result && !resp.message){
+			alert('Deleted successfully.');
+			hide_message();
+		}else{			
+			alert('Delete failed. '+resp.message);
+		}		
+	});
+}
+	gd_login(function(result){
+		if(!result) return;
+		go();
+	},true);
+}
+function proc_uploaded(resp){
+	if(resp && resp.isupload && resp.id){
+		show_message("<table><tr><td><a href='#' onclick='proc_delete(\""+resp.id+"\");return false' class='mlink' title='"+html_entity_encode(resp.title || '')+"\nDelete the uploaded file from Google Drive'>Delete (Uploaded)</a><td> &nbsp;<a href='#' onclick='hide_message();return false' class='mlink'>Close</a></table>",'','','',1000*60*60*24*2);
+	}
+}
+
+var gdesc='Converter_Temporary';
+function retrieveAllFiles(query,maxResults,callback) {
+	if(!maxResults) maxResults=100;
+  var retrievePageOfFiles = function(request, result) {
+    request.execute(function(resp) {
+      result = result.concat(resp.items);
+      var nextPageToken = resp.nextPageToken;
+      if (nextPageToken) {
+        request = gapi.client.drive.files.list({
+          'q': query, 'pageToken': nextPageToken, 'maxResults':maxResults
+        });
+        retrievePageOfFiles(request, result);
+      } else {
+        callback(result);
+      }
+    });
+  }
+  var initialRequest = gapi.client.drive.files.list({
+		'q': query		
+       });
+  retrievePageOfFiles(initialRequest, []);
+}
+function getpdflink(exportLinks, resp){
+  if(!exportLinks)return;
+  for(x in exportLinks){ 
+    if(x.toLowerCase().indexOf('pdf')>=0){
+	  return 'https://www.googleapis.com/drive/v2/files/'+resp.id+'/export?mimeType='+encodeURIComponent(x);
+      //return exportLinks[x];
+    }
+  } 
+}
+function isexpired(modifiedDate,now,expire){
+  try{
+    var issued = (new Date()).setISO8601(modifiedDate);
+    if(now-issued.getTime()>expire){
+      return true;
+    }else{
+      return false;
+    }
+  }catch(err){
+    return true;
+  }
+}
+function batchdelete(list, callback){
+	if(list.length==0){
+		if(callback) callback();
+		return;
+	}
+	/*var answer=confirm("batchdelete\n\nDo you want to continue?");
+	if(!answer){
+		if(callback) callback();
+		return;
+	}*/
+	var batch = gapi.client.newBatch();
+	for(var i = 0; i < list.length; i++){    
+		//if(i>1)break;
+		var request = gapi.client.drive.files['delete']({'fileId': list[i]});
+		batch.add(request);
+	}
+	batch.execute(function(result){
+		//console.log(result);
+		if(callback) callback(result);
+	});
+}
+var gremovetime;
+function gd_removecaches(isdirect){
+	function go(){
+		var now=(new Date()).getTime();  
+		if(gremovetime){
+			var diff=(now-gremovetime)/1000/60;
+			if(diff<25) return;
+		}
+		gremovetime=now;
+		var expire = 60*60*1000*12; //12 hour  
+
+		var today=new Date();
+		var todays=today.getFullYear()+"-"+(today.getMonth()+1)+"-"+today.getDate()+"T00:00:00";    
+		var query="trashed = true and title contains '"+gdesc+"' and mimeType contains 'application/vnd.google-apps' and modifiedDate<'"+todays+"'";
+		retrieveAllFiles(query, 10, function(result){
+			//console.log(result);
+			var dellist=[];
+			if (result && result.length > 0){
+				for (var i=0; i<result.length; i++){
+					if(result[i].labels.trashed && result[i].description==gdesc && result[i].exportLinks && result[i].title && result[i].title.indexOf(gdesc)==0){     
+						if(isexpired(result[i].modifiedDate, now, expire)){
+							dellist.push(result[i].id);
+						}
+					}
+				}
+			} 
+			batchdelete(dellist);
+		});
+	}
+	if(isdirect){
+		go();return;
+	}
+	gd_login(function(result){
+		if(!result) return;
+		gapi.client.load('drive', 'v2', function() {
+			go();
+		});
+	});
+}
+
+function gd_convert(mresp,action){
+	function end(){
+		gd_isdownloading=false;
+		clearTimeout(messagetimer);
+		hide_message();		
+		proc_uploaded(mresp);
+	}
+	function error(s){
+		alert(s);
+	}
+	function go(){
+		if(gd_isdownloading){
+			alert("It's working. Please try again later. or Cancel the current job.");
+			return;
+		}
+		var accessToken = gapi.auth.getToken().access_token;
+		if(!accessToken){
+			end();
+			alert('Error!! No access token.');
+			return;
+		}
+		var dtotal=50;
+		if(action=='getDeleteCache'){
+			var answer=confirm("Delete all temporary files in the trash folder. ("+dtotal+" temporary files at a time)\n\nDo you want to continue?");
+			if(!answer) return;
+		}
+		
+		var canceled=false;
+		gd_isdownloading=true;
+		if(action=='getDeleteCache'){
+			show_message("<table><tr><td><div id='gd_progress'>Deleting temporary files...</div></table>",'','','',1000*60*60*24*2);
+		}else{
+			show_message("<table><tr><td><div id='gd_progress'>Convert to PDF using Google Drive Converter... ("+getsize(mresp.fileSize)+")</div><td>&nbsp; <a href='#' id='gd_cancel' style='display:none;font-size:15px;color:#0000ff'>Cancel</a></table>",'','','',1000*60*60*24*2);
+			var c=_getid('gd_cancel');
+			if(c){
+				c.onclick=function(){
+					canceled=true;
+					end();
+					return false;
+				}
+			}
+		}
+
+		function _getDeleteCache(){	
+			var query="trashed = true and title contains '"+gdesc+"' and mimeType contains 'application/vnd.google-apps'";
+			retrieveAllFiles(query, 100, function(result){
+				//console.log(result);
+				var dellist=[];
+				if(result && result.length > 0){
+					for (var i = 0; i < result.length; i++) {
+						if(result[i].labels.trashed && result[i].description==gdesc && result[i].exportLinks && result[i].title && result[i].title.indexOf(gdesc)==0){
+							dellist.push(result[i].id);
+							if(dellist.length>=dtotal)break;
+						}
+					}
+				}
+				batchdelete(dellist, function(){
+					end();
+					if(dellist.length==0) show_message('No found temporary files.');
+					else show_message('Total: '+dellist.length+' Deleted.');
+				});
+			});
+		}
+		if(action=='getDeleteCache'){
+			_getDeleteCache();
+			return;
+		}
+
+		var uniqid=gdesc+'-'+mresp.id+'-'+(mresp.md5Checksum || 'Nomd5Checksum');
+		var now=(new Date()).getTime();  
+		var expire = 60*60*1000*12; //12 hour 
+		var formats=[];
+		formats.push(['xlsm','application/vnd.ms-excel.sheet.macroEnabled.12','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']);
+		formats.push(['xltm','application/vnd.ms-excel.template.macroEnabled.12','application/vnd.openxmlformats-officedocument.spreadsheetml.template']);
+		formats.push(['docm','application/vnd.ms-word.document.macroEnabled.12','application/vnd.openxmlformats-officedocument.wordprocessingml.document']);
+		formats.push(['dotm','application/vnd.ms-word.template.macroEnabled.12',"application/vnd.openxmlformats-officedocument.wordprocessingml.template"]);
+		formats.push(['pptm',"application/vnd.ms-powerpoint.presentation.macroEnabled.12","application/vnd.openxmlformats-officedocument.presentationml.presentation"]);
+		formats.push(['potm',"application/vnd.ms-powerpoint.template.macroEnabled.12","application/vnd.openxmlformats-officedocument.presentationml.template"]);
+		formats.push(['ppsm',"application/vnd.ms-powerpoint.slideshow.macroEnabled.12","application/vnd.openxmlformats-officedocument.presentationml.slideshow"]);
+
+		function findformat(){
+			var ext=getfileext(mresp.title);
+			var mt=mresp.mimeType;
+			for (var i=0; i<formats.length; i++){
+				if(formats[i][0]==ext || formats[i][1]==mt){
+					return formats[i];
+				}
+			}
+		}      
+		var ff=findformat();
+		if(ff){
+			uniqid=uniqid+"."+ff[0];
+			//alert(uniqid);
+		}
+
+		function _clean(){
+			var query="trashed = false and 'root' in parents and title='"+uniqid+"'";
+			retrieveAllFiles(query, 2, function(result){
+				//console.log(result);
+				var dellist=[];
+				if(result && result.length>0){
+					for (var i=0; i<result.length; i++){
+						if(!result[i].labels.trashed && result[i].title==uniqid && result[i].description==gdesc){
+							dellist.push(result[i].id);
+						}
+					}
+				}
+				batchdelete(dellist);
+			});
+		}		
+		function _convert(){
+			var body = {'title': uniqid, 'description':gdesc};
+			body.parents=[{"id": "root"}];        
+			body.labels={'trashed':true};
+
+			var request = gapi.client.drive.files.copy({
+				'convert': true, 'ocr':false, 'fileId': mresp.id, 'resource': body
+			});
+			request.execute(function(result){
+				//console.log(result);
+				end();
+				if(!result){
+					error('Unknown Error.');	_clean();
+				}else if(result.error){
+					var s='Error. ';
+					if(result.error.message) s+=result.error.message+' ';
+					if(result.error.code==401){
+						s+='Login or Authorize Error.';
+					}
+					error(s);
+					_clean();
+				}else if(result.id){
+					var pdflink=getpdflink(result.exportLinks, result);
+					if(pdflink){
+						hide_message(); //hide uploaded
+						setTimeout(function(){
+							_find(pdflink, result, true);
+						},1200);
+						if(!result.labels.trashed){
+							var request = gapi.client.drive.files.trash({'fileId': result.id}); //trash again
+							request.execute(function(){});
+						}
+					}else{
+						error('Error. Can not find a PDF link.');
+						var dellist=[];
+						dellist.push(result.id);
+						batchdelete(dellist);
+					}
+				}else{
+					error('Unknown Error.');	_clean();
+				}
+			});
+		}
+		function _find(pdflink, result, useretry){
+			var resp={};
+			var s1=mresp.title || '';
+			if(getfileext(s1)!='pdf') s1+='.pdf';
+			resp.title=s1;
+			resp.mimeType=result.mimeType || '';
+			resp.isupload=mresp.isupload;
+			resp.id=mresp.id;
+			gd_download(pdflink, resp, accessToken, useretry);
+		}
+
+		//convert, find cache
+		var query="trashed = true and title='"+uniqid+"'";
+		retrieveAllFiles(query, 3, function(result){			
+			//console.log(result);
+			var dellist=[];
+			if(result && result.length>0){
+				for (var i=0; i<result.length; i++){
+					if(result[i].title==uniqid && result[i].description==gdesc){
+						if(isexpired(result[i].modifiedDate, now, expire)){
+							dellist.push(result[i].id);
+						}else{
+							var pdflink=getpdflink(result[i].exportLinks, result[i]);
+				            if(pdflink){
+								end();
+								//alert('cached');
+								_find(pdflink, result[i]);
+								return;
+							}
+						}
+					}
+				}
+			}
+			_convert();
+			batchdelete(dellist);
+		});
+	}
+
+	if(!mresp){
+		if(!gd_issupported){
+			alert("This browser does not support.");
+			return;
+		}
+		if(!gd_loaded || !gd_pickerloaded){
+			alert('Not loaded library. Please try again in a few minutes.');
+			return;
+		}
+		gd_login(function(result){
+			if(!result) return;
+			gapi.client.load('drive', 'v2', function(){
+				go();
+			});
+		},true);
+	}else{
+		go();
+	}
+}
+</script>
+
+</body>
 </html>
