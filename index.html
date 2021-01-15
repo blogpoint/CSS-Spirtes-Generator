@@ -1,219 +1,31 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-  <head>
-<base href="https://pdfbob.com/editor/">    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="google" value="notranslate" />
-    <title>PDF BOB - Edit PDF free with online PDF editor</title>
-    <meta
-      name="description"
-      content="Edit PDF files with pdf bob - a free online PDF editor. Convert PDF to Word, PDF to JPG, merge PDF, split PDF, compress PDF, etc."
-    />
-    <!-- <link rel="stylesheet" href="/style.css" /> -->
-    <meta name="language" content="en" />
-    <!--<base href="/" />-->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <link rel="icon" type="image/x-icon" href="favicon.ico" />
-    <link
-      rel="stylesheet"
-      href="https://use.fontawesome.com/releases/v5.6.3/css/all.css"
-      integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/"
-      crossorigin="anonymous"
-    />
-    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+<head>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-44713249-3"></script>
+ 
+  <meta charset="utf-8">
+  <title>CutePDF Editor</title>
 
-    <link
-      href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,600,600i,700,700i|Open+Sans:400,400i,700,700i|Sarala|Caveat:400,700|Inconsolata:400,700|Lobster|PT+Serif:400,400i,700,700i|Noto+Serif:300,300i,400,400i,500,500i,600,600i,700,700i|Noto+Sans:300,300i,400,400i,500,500i,600,600i,700,700i|Ubuntu+Mono|300,300i,400,400i,500,500i,600,600i,700,700i&display=swap&subset=cyrillic,latin"
-      rel="stylesheet"
-    />
 
-    <style type="text/css" id="generatedStyle"></style>
-    <script type="text/javascript">
-      window.process = {
-        env: {DEBUG: undefined}
-      };
-    </script>
-    <script type="text/javascript" src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs" data-app-key="dropbox"></script>
-  <link rel="stylesheet" href="/editor/styles.3b446c89e483a314c387.css"></head>
-  <body>
-    <app-root></app-root>
-
-    <div id="loader">
-      <style type="text/css">
-        body,
-        html {
-          background-color: #646464;
-          font: 400 16px/1.5 'Roboto', Arial, sans-serif;
-          min-height: 100%;
-          height: 100%;
-          overflow: hidden;
-        }
-        #loader-container {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        #loader .in-spinner {
-          animation: spinnerDelay 2s linear;
-        }
-        #loader .in-spinner {
-          display: inline-block;
-          position: relative;
-          width: 76px;
-          height: 60px;
-          opacity: 1;
-        }
-        #loader .in-spinner div {
-          transform-origin: 19px 24px;
-          animation: in-spinner 1.2s linear infinite;
-        }
-        #loader .in-spinner div:after {
-          content: ' ';
-          display: block;
-          position: absolute;
-          top: 3px;
-          left: 18px;
-          width: 2px;
-          height: 12px;
-          border-radius: 20%;
-          background-color: #fff;
-        }
-        #loader .in-spinner div:nth-child(1) {
-          transform: rotate(0deg);
-          animation-delay: -1.1s;
-        }
-        #loader .in-spinner div:nth-child(2) {
-          transform: rotate(30deg);
-          animation-delay: -1s;
-        }
-        #loader .in-spinner div:nth-child(3) {
-          transform: rotate(60deg);
-          animation-delay: -0.9s;
-        }
-        #loader .in-spinner div:nth-child(4) {
-          transform: rotate(90deg);
-          animation-delay: -0.8s;
-        }
-        #loader .in-spinner div:nth-child(5) {
-          transform: rotate(120deg);
-          animation-delay: -0.7s;
-        }
-        #loader .in-spinner div:nth-child(6) {
-          transform: rotate(150deg);
-          animation-delay: -0.6s;
-        }
-        #loader .in-spinner div:nth-child(7) {
-          transform: rotate(180deg);
-          animation-delay: -0.5s;
-        }
-        #loader .in-spinner div:nth-child(8) {
-          transform: rotate(210deg);
-          animation-delay: -0.4s;
-        }
-        #loader .in-spinner div:nth-child(9) {
-          transform: rotate(240deg);
-          animation-delay: -0.3s;
-        }
-        #loader .in-spinner div:nth-child(10) {
-          transform: rotate(270deg);
-          animation-delay: -0.2s;
-        }
-        #loader .in-spinner div:nth-child(11) {
-          transform: rotate(300deg);
-          animation-delay: -0.1s;
-        }
-        #loader .in-spinner div:nth-child(12) {
-          transform: rotate(330deg);
-          animation-delay: 0s;
-        }
-        @keyframes in-spinner {
-          0% {
-            opacity: 1;
-          }
-          100% {
-            opacity: 0;
-          }
-        }
-        @keyframes spinnerDelay {
-          0% {
-            opacity: 0;
-          }
-          70% {
-            opacity: 0.05;
-          }
-          100% {
-            opacity: 1;
-          }
-        }
-      </style>
-      <div id="loader-container">
-        <div class="in-spinner">
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-        </div>
-      </div>
-    </div>
-
-    <script>
-      window.twttr = (function(d, s, id) {
-        var js,
-          fjs = d.getElementsByTagName(s)[0],
-          t = window.twttr || {};
-        if (d.getElementById(id)) return t;
-        js = d.createElement(s);
-        js.id = id;
-        js.src = 'https://platform.twitter.com/widgets.js';
-        fjs.parentNode.insertBefore(js, fjs);
-        t._e = [];
-        t.ready = function(f) {
-          t._e.push(f);
-        };
-        return t;
-      })(document, 'script', 'twitter-wjs');
-    </script>
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
-      integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
-      crossorigin="anonymous"
-    ></script>
-    <script src="https://browser.sentry-cdn.com/5.10.2/bundle.min.js" integrity="sha384-ssBfXiBvlVC7bdA/VX03S88B5MwXQWdnpJRbUYFPgswlOBwETwTp6F3SMUNpo9M9" crossorigin="anonymous">
-    </script>
-
-    <script>
-      (function(i, s, o, g, r, a, m) {
-        i['GoogleAnalyticsObject'] = r;
-        (i[r] =
-          i[r] ||
-          function() {
-            (i[r].q = i[r].q || []).push(arguments);
-          }),
-          (i[r].l = 1 * new Date());
-        (a = s.createElement(o)), (m = s.getElementsByTagName(o)[0]);
-        a.async = 1;
-        a.src = g;
-        m.parentNode.insertBefore(a, m);
-      })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
-      ga('create', 'UA-67055185-4', 'auto');
-      ga('send', 'pageview');
-    </script>
-    <script src="https://apis.google.com/js/platform.js" async defer>
-      {parsetags: 'explicit'}
-    </script>
-  <script type="text/javascript" src="/editor/runtime.2ee22503f23637c9c4c2.js"></script><script type="text/javascript" src="/editor/polyfills.f43aeb2fcc75481ae413.js"></script><script type="text/javascript" src="/editor/scripts.07c560f65777ffad6a17.js"></script><script type="text/javascript" src="/editor/vendor.c342bb76705799622d2f.js"></script><script type="text/javascript" src="/editor/main.b8666b093144dff9cda2.js"></script></body>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="cutepdfeditor.ico">
+  <!--<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">-->
+  <!--<link href="https://fonts.googleapis.com/css?family=Montserrat:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i&display=swap" rel="stylesheet">-->
+  <!--<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700,700i&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,400i&display=swap" rel="stylesheet">-->
+  <!--<link href="https://fonts.googleapis.com/css?family=Montserrat:400,400i|Open+Sans:400,700&display=swap" rel="stylesheet">-->
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,400i,700,700i|Open+Sans:400,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.4093ac4b2852ca8c989c.css"></head>
+<body>
+  <app-root><div id="loading" style="white-space:pre-line">Loading...</div></app-root>
+  <script>
+    var ver = navigator.userAgent;
+    var isIE = ver.indexOf("MSIE") !== -1 || ver.indexOf("Trident") !== -1;
+    if (isIE) {
+      var loading = document.getElementById("loading");
+      loading.textContent = "Your Web browser does not meet the minimum requirements to run CutePDF Editor.\nPlease use a new browser like Microsoft Edge, Chrome, Safari or Firefox.";
+    }
+  </script>
+<script type="text/javascript" src="runtime.70160fd61e695aff9b1e.js"></script><script type="text/javascript" src="polyfills.32ee1ff7f2c3d661aa1a.js"></script><script type="text/javascript" src="main.5c8c6893f67b05d6a98b.js"></script></body>
 </html>
